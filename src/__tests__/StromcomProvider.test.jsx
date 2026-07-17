@@ -92,6 +92,26 @@ describe('StromcomProvider', () => {
     expect(scriptFor('ck_5')).toBeNull();
   });
 
+  it('sets data-lang when language is provided', () => {
+    render(
+      <StromcomProvider clientKey="ck_lang" clientSecret="cs_lang" language="cs">
+        <div />
+      </StromcomProvider>,
+    );
+
+    expect(scriptFor('ck_lang').dataset.lang).toBe('cs');
+  });
+
+  it('omits data-lang when language is not provided', () => {
+    render(
+      <StromcomProvider clientKey="ck_nolang" clientSecret="cs_nolang">
+        <div />
+      </StromcomProvider>,
+    );
+
+    expect(scriptFor('ck_nolang').dataset.lang).toBeUndefined();
+  });
+
   it('respects a custom dataLayer name', () => {
     render(
       <StromcomProvider clientKey="ck_6" clientSecret="cs_6" dataLayer="customLayer">

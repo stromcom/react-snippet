@@ -58,6 +58,7 @@ function setupLayer(dataLayer) {
  * @param {string}  props.clientSecret  - Bearer token from the Stromcom dashboard
  * @param {string}  [props.dataLayer]   - Global JS variable name (default: "stromCom")
  * @param {string}  [props.environment] - "production" | "staging" | full custom loader URL
+ * @param {string}  [props.language]    - UI language (e.g. "cs", "en", "sk"). Omit to auto-detect from the browser.
  * @param {React.ReactNode} props.children
  *
  * @example
@@ -70,6 +71,7 @@ export function StromcomProvider({
   clientSecret,
   dataLayer = 'stromCom',
   environment = 'production',
+  language,
   children,
 }) {
   // Set up stubs synchronously so children can queue calls immediately on render.
@@ -91,11 +93,12 @@ export function StromcomProvider({
     script.dataset.dl = dl;
     script.dataset.ck = clientKey;
     script.dataset.cs = clientSecret;
+    if (language) script.dataset.lang = language;
     script.src = `${base}?${clientKey}`;
     document.head.appendChild(script);
 
     return () => script.remove();
-  }, [clientKey, clientSecret, dataLayer, environment]);
+  }, [clientKey, clientSecret, dataLayer, environment, language]);
 
   return <StromcomContext.Provider value={layer}>{children}</StromcomContext.Provider>;
 }

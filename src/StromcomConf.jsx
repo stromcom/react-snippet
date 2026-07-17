@@ -22,6 +22,7 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @param {Function} [props.notificationElementBeforeRender]- Callback before notification icon renders
  * @param {Function} [props.notificationElementAfterRender] - Callback after notification icon renders
  * @param {('stromcom-light'|'stromcom-dark'|null)} [props.theme] - Theme. null follows browser preference.
+ * @param {Function} [props.entityResolve] - async ({type, id}) => detail; resolves business-entity detail for the message editor's chip hover-card
  *
  * @example
  * <StromcomConf
@@ -43,6 +44,7 @@ export function StromcomConf({
   notificationElementBeforeRender,
   notificationElementAfterRender,
   theme,
+  entityResolve,
 }) {
   const sc = useStromcom();
 
@@ -72,6 +74,7 @@ export function StromcomConf({
     if (notificationElementAfterRender !== undefined)
       opts.notificationElementAfterRender = notificationElementAfterRender;
     if (theme !== undefined) opts.theme = theme;
+    if (entityResolve !== undefined) opts.entityResolve = entityResolve;
 
     sc.conf(opts);
   }, [
@@ -89,6 +92,7 @@ export function StromcomConf({
     notificationElementBeforeRender,
     notificationElementAfterRender,
     theme,
+    entityResolve,
   ]);
 
   return null;
