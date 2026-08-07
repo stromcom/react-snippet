@@ -1,6 +1,6 @@
 {
   "name": "@stromcom/react-snippet",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "React integration for the STROMCOM chat widget. Loads the SDK, identifies users, and embeds threads as plain React components.",
   "keywords": [
     "stromcom",
