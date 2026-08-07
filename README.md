@@ -143,7 +143,7 @@ Never pass raw internal IDs from the client.
 | `clientSecret` | `string`                                  | ✅       | Project bearer token.                                                                                                |
 | `environment`  | `"production"` \| `"staging"` \| `string` |          | Default `"production"`. Pass any custom URL to point at a self-hosted loader.                                        |
 | `dataLayer`    | `string`                                  |          | Default `"stromCom"`. The global JS variable name. Change it if `stromCom` collides with something else on the page. |
-| `language`     | `string`                                  |          | UI language (e.g. `"cs"`, `"en"`, `"sk"`). Omit to auto-detect from the browser.                                      |
+| `language`     | `string`                                  |          | UI language (e.g. `"cs"`, `"en"`, `"sk"`). Omit to auto-detect from the browser.                                     |
 
 ### `<StromcomUser>`
 
@@ -185,13 +185,13 @@ Sends SDK configuration. Place once inside the provider, before threads.
 
 Notable options:
 
-| Prop                          | Type                                      | Description                                   |
-| ----------------------------- | ----------------------------------------- | --------------------------------------------- |
-| `notificationRenderer`        | `Function`                                | Custom notification rendering function.       |
-| `onNotification`              | `Function`                                | Called when unread count changes.             |
-| `pageCSSPath`                 | `string`                                  | CSS file URL injected into the widget iframe. |
-| `notificationElementPosition` | `1\|2\|3\|4`                              | Icon position: 1=TL, 2=TR, 3=BR, 4=BL.        |
-| `theme`                       | `"stromcom-light"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.     |
+| Prop                          | Type                                      | Description                                                                                                                 |
+| ----------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `notificationRenderer`        | `Function`                                | Custom notification rendering function.                                                                                     |
+| `onNotification`              | `Function`                                | Called when unread count changes.                                                                                           |
+| `pageCSSPath`                 | `string`                                  | CSS file URL injected into the widget iframe.                                                                               |
+| `notificationElementPosition` | `1\|2\|3\|4`                              | Icon position: 1=TL, 2=TR, 3=BR, 4=BL.                                                                                      |
+| `theme`                       | `"stromcom-light"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                   |
 | `entityResolve`               | `Function`                                | `async ({type, id}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card. |
 
 See [`src/StromcomConf.jsx`](./src/StromcomConf.jsx) for the full list.
