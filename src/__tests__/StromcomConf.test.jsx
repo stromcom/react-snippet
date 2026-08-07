@@ -30,6 +30,14 @@ describe('StromcomConf', () => {
     expect(layer.conf).toHaveBeenCalledWith({ onNotification });
   });
 
+  it('forwards entityResolve as-is (no string-wrapping)', () => {
+    const layer = { conf: vi.fn() };
+    const entityResolve = vi.fn();
+    renderWithLayer(layer, { entityResolve });
+
+    expect(layer.conf).toHaveBeenCalledWith({ entityResolve });
+  });
+
   it('re-sends conf when an option changes', () => {
     const layer = { conf: vi.fn() };
     const { rerender } = renderWithLayer(layer, { theme: 'stromcom-light' });

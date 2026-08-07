@@ -19,6 +19,8 @@ export interface StromcomProviderProps {
   dataLayer?: string;
   /** `"production"`, `"staging"`, or a full custom loader URL. Default `"production"`. */
   environment?: StromcomEnvironment;
+  /** UI language (e.g. `"cs"`, `"en"`, `"sk"`). Omit to auto-detect from the browser. */
+  language?: string;
   children?: ReactNode;
 }
 
@@ -80,6 +82,8 @@ export interface StromcomConfOptions {
   notificationElementAfterRender?: () => void;
   /** Theme: `"stromcom-light"`, `"stromcom-dark"`, or `null` to follow browser preference. */
   theme?: 'stromcom-light' | 'stromcom-dark' | null;
+  /** Resolves business-entity detail (order, ticket…) for the message editor's chip hover-card. */
+  entityResolve?: (entity: { type: string; id: string }) => unknown | Promise<unknown>;
 }
 
 export function StromcomConf(props: StromcomConfOptions): null;
