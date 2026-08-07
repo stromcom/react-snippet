@@ -230,6 +230,98 @@ The provider is SSR-safe — it only touches `window` inside `useEffect`. The lo
 
 For the App Router, mount `<StromcomProvider>` in a Client Component placed inside your root layout. Server Components above it stay server-rendered. See [`examples/02-nextjs-app-router/`](./examples/02-nextjs-app-router).
 
+## Content Security Policy
+
+If your site sends a `Content-Security-Policy` header, the STROMCOM origins have to be allowed. The directives below are **additive** — merge them into your existing policy. With a restrictive `default-src` (e.g. `'none'` or `'self'`) all five must be listed explicitly.
+
+### Production
+
+| Directive     | Add                       | Why                                                         |
+| ------------- | ------------------------- | ----------------------------------------------------------- |
+| `script-src`  | `https://cdn.stromcom.cz` | Loader script, and the widget snippet it pulls in           |
+| `connect-src` | `https://www.stromcom.cz` | Notification polling against `/api/app/v1/`                 |
+| `style-src`   | `https://cdn.stromcom.cz` | Widget stylesheets (shadow root + `client.css` in `<head>`) |
+| `img-src`     | `data:`                   | SVG icons embedded in the widget CSS (loading spinner)      |
+| `frame-src`   | `https://app.stromcom.cz` | The iframe hosting threads and the notification center      |
+
+As a single header:
+
+```
+Content-Security-Policy:
+  script-src 'self' https://cdn.stromcom.cz;
+  connect-src 'self' https://www.stromcom.cz;
+  style-src 'self' https://cdn.stromcom.cz;
+  img-src 'self' data:;
+  frame-src https://app.stromcom.cz;
+```
+
+### Staging
+
+Same directives with the staging hosts — use these when the provider runs with `environment="staging"`.
+
+| Directive     | Add                               |
+| ------------- | --------------------------------- |
+| `script-src`  | `https://cdn.staging.stromcom.cz` |
+| `connect-src` | `https://staging.stromcom.cz`     |
+| `style-src`   | `https://cdn.staging.stromcom.cz` |
+| `frame-src`   | `https://app.staging.stromcom.cz` |
+
+`img-src data:` is the same in both environments.
+
+If you pass a full URL to `environment` (self-hosted or branch-preview loader, see [`examples/09-staging-environment.jsx`](./examples/09-staging-environment.jsx)), put that host in `script-src` instead.
+
+### `'unsafe-inline'` is not required
+
+`<StromcomProvider>` injects the loader with `document.createElement('script')` from `useEffect` — it never emits an inline `<script>` block, so **`script-src 'unsafe-inline'` is not needed**. This is a deliberate difference from [`stromcom/php-snippet`](https://github.com/stromcom/php-snippet), which renders the same bootstrap as an inline `<script>` and therefore needs `'unsafe-inline'` or a nonce.
+
+`style-src 'unsafe-inline'` is not needed either: widget styles are applied as constructable stylesheets inside the shadow root. The `style` props on `<StromcomThread>` and `<StromcomHome>` are applied by React through the CSSOM, which CSP does not restrict.
+
+### What you do **not** have to allow
+
+Avatars, attachments, fonts, and uploaded media are loaded **inside the widget iframe**, on the STROMCOM app origin. Your page's CSP does not apply to them — keep `font-src`, `media-src` and attachment hosts out of your policy.
+
+Two `<StromcomConf>` options are worth knowing about:
+
+| Option                       | Loaded where      | Effect on your CSP                                                   |
+| ---------------------------- | ----------------- | -------------------------------------------------------------------- |
+| `notificationElementCSSPath` | Your page         | Its host must be in your `style-src` (`'self'` if you host the file) |
+| `pageCSSPath`                | Inside the iframe | None — your page's CSP does not reach inside the iframe              |
+
+### Next.js
+
+Static headers in `next.config.js` are the simplest fit — STROMCOM needs no per-request nonce.
+
+```js
+// next.config.js
+const isDev = process.env.NODE_ENV === 'development';
+
+// 'unsafe-inline' / 'unsafe-eval' below are Next.js' own requirements
+// (hydration bootstrap, styled-jsx, dev HMR) — STROMCOM needs neither.
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://cdn.stromcom.cz`,
+  "style-src 'self' 'unsafe-inline' https://cdn.stromcom.cz",
+  `connect-src 'self' https://www.stromcom.cz${isDev ? ' ws:' : ''}`,
+  "img-src 'self' data:",
+  'frame-src https://app.stromcom.cz',
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+export default {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: contentSecurityPolicy }],
+      },
+    ];
+  },
+};
+```
+
+Swap in the staging hosts when you build for staging. If you already generate a per-request nonce in `middleware.js` (the approach in the Next.js CSP guide), just add the same STROMCOM entries to the directives you build there — the nonce itself is irrelevant to the widget.
+
 ## Troubleshooting
 
 **The loader script never appears.** Check that `clientKey` and `clientSecret` are non-empty. The provider does nothing on the server.
@@ -239,6 +331,8 @@ For the App Router, mount `<StromcomProvider>` in a Client Component placed insi
 **Thread doesn't update when I change props.** By design — threads can't be re-initialized in place. Pass a different React `key` to force a remount.
 
 **Two providers warn / double script.** Don't mount the provider twice. The provider deduplicates the `<script>` tag, but mounting two providers with different `clientKey`s is unsupported.
+
+**Console shows `Refused to load…` / CSP violations.** Your page sends a `Content-Security-Policy` header that doesn't list the STROMCOM origins. See [Content Security Policy](#content-security-policy) — the reported directive tells you which line is missing.
 
 **Notification count never fires.** Make sure `<StromcomConf onNotification={...}>` is mounted as a child of the provider, and that `<StromcomUser>` runs (notifications are user-scoped).
 
