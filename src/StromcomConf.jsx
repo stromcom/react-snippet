@@ -21,9 +21,10 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @param {Function} [props.homeBeforeRender]               - Callback before notification center opens
  * @param {Function} [props.notificationElementBeforeRender]- Callback before notification icon renders
  * @param {Function} [props.notificationElementAfterRender] - Callback after notification icon renders
- * @param {('en'|'cs'|'sk'|null)} [props.language] - UI language. null follows the browser, falling back to English.
- *                                                  Overrides the `language` prop on StromcomProvider, which is only
- *                                                  the initial value; this one can be changed at runtime.
+ * @param {(string|null)} [props.language] - UI language. Any code is accepted; one without a translation falls
+ *                                           back to English. null follows the browser. Overrides the `language`
+ *                                           prop on StromcomProvider, which is only the initial value; this one
+ *                                           can be changed at runtime.
  * @param {('stromcom-light'|'stromcom-dark'|null)} [props.theme] - Theme. null follows browser preference.
  * @param {Function} [props.entityResolve] - async ({type, id}) => detail; resolves business-entity detail for the message editor's chip hover-card
  *
