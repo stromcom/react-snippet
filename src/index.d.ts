@@ -21,7 +21,7 @@ export interface StromcomProviderProps {
   environment?: StromcomEnvironment;
   /**
    * Initial UI language (e.g. `"cs"`, `"en"`, `"sk"`). Any code is accepted; one without a
-   * translation falls back to English. Omit to auto-detect from the browser.
+   * translation falls back to the browser language, then English. Omit to auto-detect from the browser.
    * Use `StromcomConf`'s `language` prop to change it at runtime.
    */
   language?: string;
@@ -86,7 +86,7 @@ export interface StromcomConfOptions {
   notificationElementAfterRender?: () => void;
   /**
    * UI language, or `null` to follow the browser. Any language code is accepted;
-   * one the widget has no translation for falls back to English.
+   * one the widget has no translation for falls back to the browser language, then English.
    * Overrides `StromcomProviderProps.language`, which is only the initial value.
    */
   language?: string | null;

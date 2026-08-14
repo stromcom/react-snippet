@@ -22,7 +22,7 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @param {Function} [props.notificationElementBeforeRender]- Callback before notification icon renders
  * @param {Function} [props.notificationElementAfterRender] - Callback after notification icon renders
  * @param {(string|null)} [props.language] - UI language. Any code is accepted; one without a translation falls
- *                                           back to English. null follows the browser. Overrides the `language`
+ *                                           back to the browser language, then English. null follows the browser. Overrides the `language`
  *                                           prop on StromcomProvider, which is only the initial value; this one
  *                                           can be changed at runtime.
  * @param {('stromcom-light'|'stromcom-dark'|null)} [props.theme] - Theme. null follows browser preference.
