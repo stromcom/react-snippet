@@ -137,13 +137,13 @@ Never pass raw internal IDs from the client.
 
 ### `<StromcomProvider>`
 
-| Prop           | Type                                      | Required | Description                                                                                                          |
-| -------------- | ----------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `clientKey`    | `string`                                  | ✅       | Project client key.                                                                                                  |
-| `clientSecret` | `string`                                  | ✅       | Project bearer token.                                                                                                |
-| `environment`  | `"production"` \| `"staging"` \| `string` |          | Default `"production"`. Pass any custom URL to point at a self-hosted loader.                                        |
-| `dataLayer`    | `string`                                  |          | Default `"stromCom"`. The global JS variable name. Change it if `stromCom` collides with something else on the page. |
-| `language`     | `string`                                  |          | UI language (e.g. `"cs"`, `"en"`, `"sk"`). Omit to auto-detect from the browser.                                     |
+| Prop           | Type                                      | Required | Description                                                                                                                                      |
+| -------------- | ----------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `clientKey`    | `string`                                  | ✅       | Project client key.                                                                                                                              |
+| `clientSecret` | `string`                                  | ✅       | Project bearer token.                                                                                                                            |
+| `environment`  | `"production"` \| `"staging"` \| `string` |          | Default `"production"`. Pass any custom URL to point at a self-hosted loader.                                                                    |
+| `dataLayer`    | `string`                                  |          | Default `"stromCom"`. The global JS variable name. Change it if `stromCom` collides with something else on the page.                             |
+| `language`     | `string`                                  |          | Initial UI language (e.g. `"cs"`, `"en"`, `"sk"`). Omit to auto-detect from the browser. To change it at runtime, use `<StromcomConf language>`. |
 
 ### `<StromcomUser>`
 
@@ -191,6 +191,7 @@ Notable options:
 | `onNotification`              | `Function`                                | Called when unread count changes.                                                                                           |
 | `pageCSSPath`                 | `string`                                  | CSS file URL injected into the widget iframe.                                                                               |
 | `notificationElementPosition` | `1\|2\|3\|4`                              | Icon position: 1=TL, 2=TR, 3=BR, 4=BL.                                                                                      |
+| `language`                    | `"en"\|"cs"\|"sk"\|null`                  | UI language. `null` follows the browser, falling back to English. Overrides `<StromcomProvider language>`.                  |
 | `theme`                       | `"stromcom-light"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                   |
 | `entityResolve`               | `Function`                                | `async ({type, id}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card. |
 

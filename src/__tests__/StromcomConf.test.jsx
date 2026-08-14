@@ -38,6 +38,34 @@ describe('StromcomConf', () => {
     expect(layer.conf).toHaveBeenCalledWith({ entityResolve });
   });
 
+  it('sends the language option', () => {
+    const layer = { conf: vi.fn() };
+    renderWithLayer(layer, { language: 'cs' });
+
+    expect(layer.conf).toHaveBeenCalledWith({ language: 'cs' });
+  });
+
+  it('sends language null to follow the browser', () => {
+    const layer = { conf: vi.fn() };
+    renderWithLayer(layer, { language: null });
+
+    expect(layer.conf).toHaveBeenCalledWith({ language: null });
+  });
+
+  it('re-sends conf when the language changes', () => {
+    const layer = { conf: vi.fn() };
+    const { rerender } = renderWithLayer(layer, { language: 'cs' });
+
+    rerender(
+      <StromcomContext.Provider value={layer}>
+        <StromcomConf language="sk" />
+      </StromcomContext.Provider>,
+    );
+
+    expect(layer.conf).toHaveBeenCalledTimes(2);
+    expect(layer.conf).toHaveBeenLastCalledWith({ language: 'sk' });
+  });
+
   it('re-sends conf when an option changes', () => {
     const layer = { conf: vi.fn() };
     const { rerender } = renderWithLayer(layer, { theme: 'stromcom-light' });

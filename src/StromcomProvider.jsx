@@ -58,7 +58,8 @@ function setupLayer(dataLayer) {
  * @param {string}  props.clientSecret  - Bearer token from the Stromcom dashboard
  * @param {string}  [props.dataLayer]   - Global JS variable name (default: "stromCom")
  * @param {string}  [props.environment] - "production" | "staging" | full custom loader URL
- * @param {string}  [props.language]    - UI language (e.g. "cs", "en", "sk"). Omit to auto-detect from the browser.
+ * @param {string}  [props.language]    - Initial UI language (e.g. "cs", "en", "sk"). Omit to auto-detect from the
+ *                                        browser. Use StromcomConf's `language` prop to change it at runtime.
  * @param {React.ReactNode} props.children
  *
  * @example
