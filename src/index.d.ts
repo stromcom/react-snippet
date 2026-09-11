@@ -72,7 +72,13 @@ export function StromcomHome(props: StromcomHomeProps): JSX.Element;
 export interface StromcomConfOptions {
   notificationRenderer?: (notification: unknown) => unknown;
   onNotification?: (count: number) => void;
-  pageCSSPath?: string;
+  /** CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe. */
+  appFrameCSSPath?: string | string[];
+  /**
+   * CSS for the app itself (inside the iframe), on top of the CSS from the project
+   * settings. Applied only on a plan that allows appearance customization.
+   */
+  appCSSPath?: string | string[];
   notificationElementTargetElement?:
     (() => HTMLElement | Promise<HTMLElement>) | HTMLElement | Promise<HTMLElement>;
   notificationElementShowAlways?: boolean;

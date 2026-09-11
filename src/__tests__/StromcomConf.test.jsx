@@ -38,6 +38,21 @@ describe('StromcomConf', () => {
     expect(layer.conf).toHaveBeenCalledWith({ entityResolve });
   });
 
+  it('sends a single CSS path', () => {
+    const layer = { conf: vi.fn() };
+    renderWithLayer(layer, { appFrameCSSPath: 'https://example.com/frame.css' });
+
+    expect(layer.conf).toHaveBeenCalledWith({ appFrameCSSPath: 'https://example.com/frame.css' });
+  });
+
+  it('sends a list of CSS paths as an array', () => {
+    const layer = { conf: vi.fn() };
+    const appCSSPath = ['https://example.com/a.css', 'https://example.com/b.css'];
+    renderWithLayer(layer, { appCSSPath });
+
+    expect(layer.conf).toHaveBeenCalledWith({ appCSSPath });
+  });
+
   it('sends the language option', () => {
     const layer = { conf: vi.fn() };
     renderWithLayer(layer, { language: 'cs' });

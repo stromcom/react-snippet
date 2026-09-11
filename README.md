@@ -189,13 +189,33 @@ Notable options:
 | ----------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `notificationRenderer`        | `Function`                                | Custom notification rendering function.                                                                                                                                             |
 | `onNotification`              | `Function`                                | Called when unread count changes.                                                                                                                                                   |
-| `pageCSSPath`                 | `string`                                  | CSS file URL injected into the widget iframe.                                                                                                                                       |
+| `appFrameCSSPath`             | `string\|string[]`                        | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                      |
+| `appCSSPath`                  | `string\|string[]`                        | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                            |
 | `notificationElementPosition` | `1\|2\|3\|4`                              | Icon position: 1=TL, 2=TR, 3=BR, 4=BL.                                                                                                                                              |
 | `language`                    | `string\|null`                            | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`. |
 | `theme`                       | `"stromcom-light"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                           |
 | `entityResolve`               | `Function`                                | `async ({type, id}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                                         |
 
 See [`src/StromcomConf.jsx`](./src/StromcomConf.jsx) for the full list.
+
+#### Custom CSS
+
+The widget renders into a shadow root and the app runs in an iframe, so neither is
+reachable from your page stylesheet. `appFrameCSSPath` covers the frame — container,
+backdrop, the iframe element itself — and `appCSSPath` the UI inside it. Both accept one
+URL or a list, and both load after the widget's own stylesheet, so your rules win.
+
+```jsx
+const APP_CSS = ['https://cdn.example.com/widget.css', 'https://cdn.example.com/brand.css'];
+
+<StromcomConf appFrameCSSPath="https://cdn.example.com/frame.css" appCSSPath={APP_CSS} />;
+```
+
+Keep the array identity stable (a module constant or `useMemo`) — like every option prop,
+a new value re-sends the configuration, and an inline array is a new value on every render.
+
+`appCSSPath` is applied on top of the `customCSSPath` from the project settings and, like
+it, only on a plan that allows appearance customization; without it the app ignores both.
 
 ### `useStromcom()` — escape hatch
 
@@ -285,10 +305,11 @@ Avatars, attachments, fonts, and uploaded media are loaded **inside the widget i
 
 Two `<StromcomConf>` options are worth knowing about:
 
-| Option                       | Loaded where      | Effect on your CSP                                                   |
-| ---------------------------- | ----------------- | -------------------------------------------------------------------- |
-| `notificationElementCSSPath` | Your page         | Its host must be in your `style-src` (`'self'` if you host the file) |
-| `pageCSSPath`                | Inside the iframe | None — your page's CSP does not reach inside the iframe              |
+| Option                       | Loaded where      | Effect on your CSP                                                          |
+| ---------------------------- | ----------------- | --------------------------------------------------------------------------- |
+| `notificationElementCSSPath` | Your page         | Its host must be in your `style-src` (`'self'` if you host the file)        |
+| `appFrameCSSPath`            | Your page         | Its host must be in your `style-src` — a shadow root is still your document |
+| `appCSSPath`                 | Inside the iframe | None — your page's CSP does not reach inside the iframe                     |
 
 ### Next.js
 
