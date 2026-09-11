@@ -11,7 +11,8 @@ import { useStromcom } from './StromcomProvider.jsx';
  *
  * @param {object}   [props.notificationRenderer]           - Function(notification) for custom notification rendering
  * @param {object}   [props.onNotification]                 - Function(count) called when unread count changes
- * @param {string}   [props.pageCSSPath]                    - URL of CSS file injected into the widget iframe
+ * @param {(string|string[])} [props.appFrameCSSPath] - CSS URL(s) for the widget frame — the shadow root holding the container, the backdrop and the iframe
+ * @param {(string|string[])} [props.appCSSPath]      - CSS URL(s) for the app itself (inside the iframe), on top of the CSS from the project settings
  * @param {Function} [props.notificationElementTargetElement] - Function/Promise/Element returning the icon mount target
  * @param {boolean}  [props.notificationElementShowAlways]  - Show icon even with zero notifications
  * @param {number}   [props.notificationElementPosition]    - Icon position: 1=top-left 2=top-right 3=bottom-right 4=bottom-left
@@ -37,7 +38,8 @@ import { useStromcom } from './StromcomProvider.jsx';
 export function StromcomConf({
   notificationRenderer,
   onNotification,
-  pageCSSPath,
+  appFrameCSSPath,
+  appCSSPath,
   notificationElementTargetElement,
   notificationElementShowAlways,
   notificationElementPosition,
@@ -60,7 +62,8 @@ export function StromcomConf({
 
     if (notificationRenderer !== undefined) opts.notificationRenderer = notificationRenderer;
     if (onNotification !== undefined) opts.onNotification = onNotification;
-    if (pageCSSPath !== undefined) opts.pageCSSPath = pageCSSPath;
+    if (appFrameCSSPath !== undefined) opts.appFrameCSSPath = appFrameCSSPath;
+    if (appCSSPath !== undefined) opts.appCSSPath = appCSSPath;
     if (notificationElementTargetElement !== undefined)
       opts.notificationElementTargetElement = notificationElementTargetElement;
     if (notificationElementShowAlways !== undefined)
@@ -87,7 +90,8 @@ export function StromcomConf({
     sc,
     notificationRenderer,
     onNotification,
-    pageCSSPath,
+    appFrameCSSPath,
+    appCSSPath,
     notificationElementTargetElement,
     notificationElementShowAlways,
     notificationElementPosition,
