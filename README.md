@@ -103,9 +103,9 @@ Just render `<StromcomThread>` multiple times with different `code`s. Each div h
 
 See [`examples/06-multiple-threads-per-page.jsx`](./examples/06-multiple-threads-per-page.jsx).
 
-### Anonymous / public pages
+### Logged-in users only
 
-`<StromcomUser>` is optional. Skip it when there's no logged-in user — threads work read/write according to the dashboard's anonymous policy. Re-mount it the moment a visitor logs in. See [`examples/04-anonymous-then-login.jsx`](./examples/04-anonymous-then-login.jsx).
+STROMCOM is for communication between your logged-in users — there are no anonymous visitors. The widget renders **nothing** (no threads, no notification bubble) until `<StromcomUser>` has been mounted with both `code` **and** `name`. Render `<StromcomUser>` (and your threads) only for logged-in users, and mount it the moment a user logs in. See [`examples/04-anonymous-then-login.jsx`](./examples/04-anonymous-then-login.jsx).
 
 ## Hashing user & thread codes — IMPORTANT
 
@@ -147,12 +147,12 @@ Never pass raw internal IDs from the client.
 
 ### `<StromcomUser>`
 
-Identifies the logged-in user. Re-calls `initUser` whenever any prop changes. Renders nothing.
+Identifies the logged-in user. Re-calls `initUser` whenever any prop changes. Renders nothing. The widget stays hidden until both `code` and `name` are set; in development a missing `name` logs a `console.warn`.
 
 | Prop           | Type      | Required | Description                                             |
 | -------------- | --------- | -------- | ------------------------------------------------------- |
 | `code`         | `string`  | ✅       | Hashed user identifier. Max 100 chars, `[a-zA-Z0-9-_]`. |
-| `name`         | `string`  |          | Display name.                                           |
+| `name`         | `string`  | ✅       | Display name. Without it the widget renders nothing.    |
 | `emailAddress` | `string`  |          | Used for email notifications.                           |
 | `readOnly`     | `boolean` |          | When `true`, user can read but not send messages.       |
 | `avatarURL`    | `string`  |          | Full avatar URL.                                        |
@@ -185,16 +185,16 @@ Sends SDK configuration. Place once inside the provider, before threads.
 
 Notable options:
 
-| Prop                          | Type                                      | Description                                                                                                                                                                         |
-| ----------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `notificationRenderer`        | `Function`                                | Custom notification rendering function.                                                                                                                                             |
-| `onNotification`              | `Function`                                | Called when unread count changes.                                                                                                                                                   |
-| `appFrameCSSPath`             | `string\|string[]`                        | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                      |
-| `appCSSPath`                  | `string\|string[]`                        | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                            |
-| `notificationElementPosition` | `1\|2\|3\|4`                              | Icon position: 1=TL, 2=TR, 3=BR, 4=BL.                                                                                                                                              |
-| `language`                    | `string\|null`                            | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`. |
-| `theme`                       | `"stromcom-light"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                           |
-| `entityResolve`               | `Function`                                | `async ({type, id}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                                         |
+| Prop                          | Type                                        | Description                                                                                                                                                                         |
+| ----------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `notificationRenderer`        | `Function`                                  | Custom notification rendering function.                                                                                                                                             |
+| `onNotification`              | `Function`                                  | Called when unread count changes.                                                                                                                                                   |
+| `appFrameCSSPath`             | `string\|string[]`                          | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                      |
+| `appCSSPath`                  | `string\|string[]`                          | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                            |
+| `notificationElementPosition` | `1\|2\|3\|4\|null`                          | Icon position: 1=TL, 2=TR, 3=BR, 4=BL. `null` = no notification bubble.                                                                                                             |
+| `language`                    | `string\|null`                              | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`. |
+| `theme`                       | `"stromcom-default"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                           |
+| `entityResolve`               | `Function`                                  | `async ({type, id, groups, url}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                            |
 
 See [`src/StromcomConf.jsx`](./src/StromcomConf.jsx) for the full list.
 
@@ -226,8 +226,46 @@ import { useStromcom } from '@stromcom/react-snippet';
 
 function SwitchUserButton() {
   const sc = useStromcom();
-  return <button onClick={() => sc?.initUser({ code: 'newHashedCode' })}>Switch user</button>;
+  return (
+    <button onClick={() => sc?.initUser({ code: 'newHashedCode', name: 'Jane' })}>
+      Switch user
+    </button>
+  );
 }
+```
+
+## Limitations
+
+The components cover the common cases; a few SDK features are only reachable imperatively via `useStromcom()`:
+
+- **`<StromcomThread>` doesn't forward `attributes` or `hash`**, and it is initialised once on mount. When the entity changes, pass a new React `key` to remount it.
+- **`<StromcomConf>` doesn't expose `onLoad`.**
+- **`conf()` replaces the whole configuration.** Every `<StromcomConf>` render sends its full option set, so don't mix `<StromcomConf>` with imperative `sc.conf(...)` calls — whichever runs last wins and drops the other's options. Pick one.
+- **Memoize callback and array props** (`onNotification`, `entityResolve`, `appCSSPath`, …) with `useCallback` / `useMemo` or module constants. A new identity on every render re-sends the configuration.
+
+For a thread with `attributes`, call the SDK yourself:
+
+```jsx
+import { useEffect, useRef } from 'react';
+import { useStromcom } from '@stromcom/react-snippet';
+
+function OrderThread({ order }) {
+  const sc = useStromcom();
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!sc || !ref.current) return;
+    sc.thread(ref.current, {
+      code: order.stromcomHash,
+      name: `Order #${order.id}`,
+      attributes: { status: order.status },
+    });
+  }, [sc, order.stromcomHash]);
+
+  return <div ref={ref} style={{ height: 500 }} />;
+}
+
+// Remount on entity change: <OrderThread key={order.id} order={order} />
 ```
 
 ## Examples
@@ -239,7 +277,7 @@ The [`examples/`](./examples) folder has focused, copy-pasteable snippets for th
 | [`01-basic-app.jsx`](./examples/01-basic-app.jsx)                                 | Minimal setup — provider + user + one thread       |
 | [`02-nextjs-app-router/`](./examples/02-nextjs-app-router)                        | Next.js 13+ App Router with server-side hashing    |
 | [`03-multi-page-router.jsx`](./examples/03-multi-page-router.jsx)                 | React Router — provider in root, thread per route  |
-| [`04-anonymous-then-login.jsx`](./examples/04-anonymous-then-login.jsx)           | Public site, user mounts only after login          |
+| [`04-anonymous-then-login.jsx`](./examples/04-anonymous-then-login.jsx)           | User and threads mount only after login            |
 | [`05-conditional-thread.jsx`](./examples/05-conditional-thread.jsx)               | Thread inside a modal / opens on demand            |
 | [`06-multiple-threads-per-page.jsx`](./examples/06-multiple-threads-per-page.jsx) | Several threads on one page (per-row, per-section) |
 | [`07-imperative-api.jsx`](./examples/07-imperative-api.jsx)                       | `useStromcom()` for switch-user / logout flows     |

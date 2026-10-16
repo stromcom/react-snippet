@@ -83,7 +83,7 @@ describe('StromcomConf', () => {
 
   it('re-sends conf when an option changes', () => {
     const layer = { conf: vi.fn() };
-    const { rerender } = renderWithLayer(layer, { theme: 'stromcom-light' });
+    const { rerender } = renderWithLayer(layer, { theme: 'stromcom-default' });
 
     rerender(
       <StromcomContext.Provider value={layer}>

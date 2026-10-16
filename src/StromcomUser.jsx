@@ -5,12 +5,15 @@ import { useStromcom } from './StromcomProvider.jsx';
  * Identifies the currently logged-in user.
  * Re-calls initUser whenever any prop changes.
  *
+ * The widget renders nothing until both `code` and `name` are set, so render
+ * this component only for logged-in users and always pass `name`.
+ *
  * IMPORTANT: The `code` should already be hashed server-side (HMAC + base-62).
  * Never pass your raw internal user ID directly from the client.
  *
  * @param {object}  props
  * @param {string}  props.code          - Hashed unique user identifier (max 100 chars, [a-zA-Z0-9-_])
- * @param {string}  [props.name]        - Display name
+ * @param {string}  props.name          - Display name (required)
  * @param {string}  [props.emailAddress]- Used for email notifications
  * @param {boolean} [props.readOnly]    - When true, user can read but not send messages
  * @param {string}  [props.avatarURL]   - Full URL to avatar image
@@ -24,6 +27,14 @@ import { useStromcom } from './StromcomProvider.jsx';
  */
 export function StromcomUser({ code, name, emailAddress, readOnly, avatarURL }) {
   const sc = useStromcom();
+
+  useEffect(() => {
+    if (!name && typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+      console.warn(
+        '[@stromcom/react-snippet] <StromcomUser> is missing `name` — the widget renders nothing until both `code` and `name` are set.',
+      );
+    }
+  }, [name]);
 
   useEffect(() => {
     if (!sc) return;
