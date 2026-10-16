@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { StromcomContext } from '../StromcomProvider.jsx';
 import { StromcomUser } from '../StromcomUser.jsx';
@@ -11,7 +11,16 @@ function renderWithLayer(layer, props) {
   );
 }
 
-afterEach(() => cleanup());
+let warn;
+
+beforeEach(() => {
+  warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  cleanup();
+  warn.mockRestore();
+});
 
 describe('StromcomUser', () => {
   it('calls initUser with only the code when no optional props are given', () => {
@@ -55,8 +64,23 @@ describe('StromcomUser', () => {
     expect(layer.initUser).toHaveBeenLastCalledWith({ code: 'hashed-user-3', name: 'Janet' });
   });
 
+  it('warns in development when name is missing', () => {
+    const layer = { initUser: vi.fn() };
+    renderWithLayer(layer, { code: 'hashed-user-5' });
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('missing `name`');
+  });
+
+  it('does not warn when name is given', () => {
+    const layer = { initUser: vi.fn() };
+    renderWithLayer(layer, { code: 'hashed-user-6', name: 'Jane' });
+
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it('does not call initUser and renders nothing when there is no layer', () => {
-    const { container } = render(<StromcomUser code="hashed-user-4" />);
+    const { container } = render(<StromcomUser code="hashed-user-4" name="Jane" />);
 
     expect(container.firstChild).toBeNull();
   });

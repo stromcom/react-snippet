@@ -15,7 +15,7 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @param {(string|string[])} [props.appCSSPath]      - CSS URL(s) for the app itself (inside the iframe), on top of the CSS from the project settings
  * @param {Function} [props.notificationElementTargetElement] - Function/Promise/Element returning the icon mount target
  * @param {boolean}  [props.notificationElementShowAlways]  - Show icon even with zero notifications
- * @param {number}   [props.notificationElementPosition]    - Icon position: 1=top-left 2=top-right 3=bottom-right 4=bottom-left
+ * @param {number}   [props.notificationElementPosition]    - Icon position: 1=top-left 2=top-right 3=bottom-right 4=bottom-left; null = no bubble
  * @param {object}   [props.notificationElementStyles]      - Inline styles object for the default notification button
  * @param {string}   [props.notificationElementCSSPath]     - CSS URL for the default notification renderer
  * @param {boolean}  [props.notificationElementNoShadowRoot]- Disable shadow-root for notifications
@@ -26,8 +26,8 @@ import { useStromcom } from './StromcomProvider.jsx';
  *                                           back to the browser language, then English. null follows the browser. Overrides the `language`
  *                                           prop on StromcomProvider, which is only the initial value; this one
  *                                           can be changed at runtime.
- * @param {('stromcom-light'|'stromcom-dark'|null)} [props.theme] - Theme. null follows browser preference.
- * @param {Function} [props.entityResolve] - async ({type, id}) => detail; resolves business-entity detail for the message editor's chip hover-card
+ * @param {('stromcom-default'|'stromcom-dark'|null)} [props.theme] - Theme. null follows browser preference.
+ * @param {Function} [props.entityResolve] - async ({type, id, groups, url}) => detail; resolves business-entity detail for the message editor's chip hover-card
  *
  * @example
  * <StromcomConf

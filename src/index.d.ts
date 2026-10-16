@@ -36,7 +36,8 @@ export function useStromcom(): StromcomLayer | null;
 export interface StromcomUserOptions {
   /** Hashed unique user identifier (max 100 chars, [a-zA-Z0-9-_]). Hash server-side. */
   code: string;
-  name?: string;
+  /** Display name. Required — the widget renders nothing until both `code` and `name` are set. */
+  name: string;
   emailAddress?: string;
   readOnly?: boolean;
   avatarURL?: string;
@@ -69,6 +70,14 @@ export interface StromcomHomeProps {
 
 export function StromcomHome(props: StromcomHomeProps): JSX.Element;
 
+/** Business entity passed to `entityResolve`. */
+export interface StromcomEntity {
+  type: string;
+  id: string;
+  groups: string[];
+  url: string;
+}
+
 export interface StromcomConfOptions {
   notificationRenderer?: (notification: unknown) => unknown;
   onNotification?: (count: number) => void;
@@ -82,8 +91,8 @@ export interface StromcomConfOptions {
   notificationElementTargetElement?:
     (() => HTMLElement | Promise<HTMLElement>) | HTMLElement | Promise<HTMLElement>;
   notificationElementShowAlways?: boolean;
-  /** Icon position: 1=top-left, 2=top-right, 3=bottom-right, 4=bottom-left. */
-  notificationElementPosition?: 1 | 2 | 3 | 4;
+  /** Icon position: 1=top-left, 2=top-right, 3=bottom-right, 4=bottom-left; `null` = no bubble. */
+  notificationElementPosition?: 1 | 2 | 3 | 4 | null;
   notificationElementStyles?: Record<string, string | number | null>;
   notificationElementCSSPath?: string;
   notificationElementNoShadowRoot?: boolean;
@@ -96,10 +105,10 @@ export interface StromcomConfOptions {
    * Overrides `StromcomProviderProps.language`, which is only the initial value.
    */
   language?: string | null;
-  /** Theme: `"stromcom-light"`, `"stromcom-dark"`, or `null` to follow browser preference. */
-  theme?: 'stromcom-light' | 'stromcom-dark' | null;
+  /** Theme: `"stromcom-default"`, `"stromcom-dark"`, or `null` to follow browser preference. */
+  theme?: 'stromcom-default' | 'stromcom-dark' | null;
   /** Resolves business-entity detail (order, ticket…) for the message editor's chip hover-card. */
-  entityResolve?: (entity: { type: string; id: string }) => unknown | Promise<unknown>;
+  entityResolve?: (entity: StromcomEntity) => unknown | Promise<unknown>;
 }
 
 export function StromcomConf(props: StromcomConfOptions): null;

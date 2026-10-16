@@ -13,7 +13,7 @@ import { StromcomConf } from '@stromcom/react-snippet';
 export function ThemedStromcom({ appTheme }) {
   // Map your app's theme state onto the widget's accepted values.
   const widgetTheme =
-    appTheme === 'dark' ? 'stromcom-dark' : appTheme === 'light' ? 'stromcom-light' : null; // "system"
+    appTheme === 'dark' ? 'stromcom-dark' : appTheme === 'light' ? 'stromcom-default' : null; // "system"
 
   return <StromcomConf theme={widgetTheme} notificationElementPosition={3} />;
 }

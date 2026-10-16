@@ -1,10 +1,11 @@
 /**
- * 04 — Public site, then login
+ * 04 — Logged-out state, then login
  *
- * <StromcomUser> is optional. While the visitor is anonymous, simply don't
- * render it. As soon as they log in, mount it with the hashed user code —
- * any threads already on the page will start associating new messages with
- * that user without a page reload.
+ * The widget renders nothing — no threads, no notification bubble — until
+ * <StromcomUser> is mounted with both `code` and `name`. There are no
+ * anonymous visitors: render the user (and your threads) only once someone
+ * is logged in. As soon as they log in, mount <StromcomUser> and the widget
+ * appears without a page reload.
  *
  * This is also the right pattern for "switch user" / "log out" flows:
  * unmount StromcomUser on logout, remount it on the next login.
@@ -19,32 +20,30 @@ import {
 import { useAuth } from './auth'; // your auth context
 
 export default function App() {
+  const { user } = useAuth();
+
   return (
     <StromcomProvider
       clientKey={import.meta.env.VITE_STROMCOM_CLIENT_KEY}
       clientSecret={import.meta.env.VITE_STROMCOM_CLIENT_SECRET}
     >
       <StromcomConf notificationElementPosition={3} />
-      <CurrentUserBinding />
-      <PublicHelpThread />
+      {user ? (
+        <>
+          <StromcomUser code={user.stromcomHash} name={user.name} emailAddress={user.email} />
+          <TeamThread />
+        </>
+      ) : (
+        <p>Log in to see team conversations.</p>
+      )}
     </StromcomProvider>
   );
 }
 
-function CurrentUserBinding() {
-  const { user } = useAuth();
-
-  // Anonymous visitor — render nothing. Threads still work according to
-  // your dashboard's anonymous policy.
-  if (!user) return null;
-
-  return <StromcomUser code={user.stromcomHash} name={user.name} emailAddress={user.email} />;
-}
-
-function PublicHelpThread() {
-  // A single shared "ask us anything" thread on the public site.
+function TeamThread() {
+  // A shared thread for the logged-in team.
   // The hashed code comes from your /api/page-meta or similar.
-  const { publicHelpHash } = window.__APP_BOOTSTRAP__;
+  const { teamThreadHash } = window.__APP_BOOTSTRAP__;
 
-  return <StromcomThread code={publicHelpHash} name="Talk to support" style={{ height: 480 }} />;
+  return <StromcomThread code={teamThreadHash} name="Team" style={{ height: 480 }} />;
 }

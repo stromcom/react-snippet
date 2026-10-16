@@ -9,7 +9,7 @@ projects.
 | [`01-basic-app.jsx`](./01-basic-app.jsx)                                 | Minimal setup — provider, conf, user, one thread, home       |
 | [`02-nextjs-app-router/`](./02-nextjs-app-router)                        | Next.js 13+ App Router with server-side hashing              |
 | [`03-multi-page-router.jsx`](./03-multi-page-router.jsx)                 | React Router — provider once at the root, thread per route   |
-| [`04-anonymous-then-login.jsx`](./04-anonymous-then-login.jsx)           | Public site; user mounts only after login                    |
+| [`04-anonymous-then-login.jsx`](./04-anonymous-then-login.jsx)           | User and threads mount only after login                      |
 | [`05-conditional-thread.jsx`](./05-conditional-thread.jsx)               | Thread inside a modal / opens on demand                      |
 | [`06-multiple-threads-per-page.jsx`](./06-multiple-threads-per-page.jsx) | Several threads on one page (per-row, per-section, parallel) |
 | [`07-imperative-api.jsx`](./07-imperative-api.jsx)                       | `useStromcom()` for switch-user / logout                     |
