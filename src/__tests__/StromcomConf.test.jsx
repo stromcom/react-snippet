@@ -30,6 +30,14 @@ describe('StromcomConf', () => {
     expect(layer.conf).toHaveBeenCalledWith({ onNotification });
   });
 
+  it('forwards onLoad as-is (no string-wrapping)', () => {
+    const layer = { conf: vi.fn() };
+    const onLoad = vi.fn();
+    renderWithLayer(layer, { onLoad });
+
+    expect(layer.conf).toHaveBeenCalledWith({ onLoad });
+  });
+
   it('forwards entityResolve as-is (no string-wrapping)', () => {
     const layer = { conf: vi.fn() };
     const entityResolve = vi.fn();

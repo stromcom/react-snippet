@@ -10,7 +10,8 @@ import { useStromcom } from './StromcomProvider.jsx';
  * actual JS functions here — no need for the string-wrapping used in the PHP library.
  *
  * @param {object}   [props.notificationRenderer]           - Function(notification) for custom notification rendering
- * @param {object}   [props.onNotification]                 - Function(count) called when unread count changes
+ * @param {object}   [props.onNotification]                 - Function({thread, message, notification, reaction}) called with the unread counts
+ * @param {Function} [props.onLoad]                         - Called once the widget is running; from then on stromCom.openHome() / closeHome() / toggleHome() work
  * @param {(string|string[])} [props.appFrameCSSPath] - CSS URL(s) for the widget frame — the shadow root holding the container, the backdrop and the iframe
  * @param {(string|string[])} [props.appCSSPath]      - CSS URL(s) for the app itself (inside the iframe), on top of the CSS from the project settings
  * @param {Function} [props.notificationElementTargetElement] - Function/Promise/Element returning the icon mount target
@@ -19,7 +20,7 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @param {object}   [props.notificationElementStyles]      - Inline styles object for the default notification button
  * @param {string}   [props.notificationElementCSSPath]     - CSS URL for the default notification renderer
  * @param {boolean}  [props.notificationElementNoShadowRoot]- Disable shadow-root for notifications
- * @param {Function} [props.homeBeforeRender]               - Callback before notification center opens
+ * @param {Function} [props.homeBeforeRender]               - Callback before the notification center opens for the first time
  * @param {Function} [props.notificationElementBeforeRender]- Callback before notification icon renders
  * @param {Function} [props.notificationElementAfterRender] - Callback after notification icon renders
  * @param {(string|null)} [props.language] - UI language. Any code is accepted; one without a translation falls
@@ -32,12 +33,13 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @example
  * <StromcomConf
  *   notificationElementPosition={4}
- *   onNotification={(count) => setBadge(count)}
+ *   onNotification={(counts) => setBadge(counts.thread + counts.notification)}
  * />
  */
 export function StromcomConf({
   notificationRenderer,
   onNotification,
+  onLoad,
   appFrameCSSPath,
   appCSSPath,
   notificationElementTargetElement,
@@ -62,6 +64,7 @@ export function StromcomConf({
 
     if (notificationRenderer !== undefined) opts.notificationRenderer = notificationRenderer;
     if (onNotification !== undefined) opts.onNotification = onNotification;
+    if (onLoad !== undefined) opts.onLoad = onLoad;
     if (appFrameCSSPath !== undefined) opts.appFrameCSSPath = appFrameCSSPath;
     if (appCSSPath !== undefined) opts.appCSSPath = appCSSPath;
     if (notificationElementTargetElement !== undefined)
@@ -90,6 +93,7 @@ export function StromcomConf({
     sc,
     notificationRenderer,
     onNotification,
+    onLoad,
     appFrameCSSPath,
     appCSSPath,
     notificationElementTargetElement,

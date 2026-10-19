@@ -185,16 +185,17 @@ Sends SDK configuration. Place once inside the provider, before threads.
 
 Notable options:
 
-| Prop                          | Type                                        | Description                                                                                                                                                                         |
-| ----------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `notificationRenderer`        | `Function`                                  | Custom notification rendering function.                                                                                                                                             |
-| `onNotification`              | `Function`                                  | Called when unread count changes.                                                                                                                                                   |
-| `appFrameCSSPath`             | `string\|string[]`                          | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                      |
-| `appCSSPath`                  | `string\|string[]`                          | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                            |
-| `notificationElementPosition` | `1\|2\|3\|4\|null`                          | Icon position: 1=TL, 2=TR, 3=BR, 4=BL. `null` = no notification bubble.                                                                                                             |
-| `language`                    | `string\|null`                              | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`. |
-| `theme`                       | `"stromcom-default"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                           |
-| `entityResolve`               | `Function`                                  | `async ({type, id, groups, url}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                            |
+| Prop                          | Type                                        | Description                                                                                                                                                                                      |
+| ----------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `notificationRenderer`        | `Function`                                  | Custom notification rendering function.                                                                                                                                                          |
+| `onNotification`              | `Function`                                  | Called with the unread counts `{thread, message, notification, reaction}`.                                                                                                                       |
+| `onLoad`                      | `Function`                                  | Called once the widget is running. From then on `openHome()`, `closeHome()` and `toggleHome()` work — see [Notification center from your own button](#notification-center-from-your-own-button). |
+| `appFrameCSSPath`             | `string\|string[]`                          | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                                   |
+| `appCSSPath`                  | `string\|string[]`                          | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                                         |
+| `notificationElementPosition` | `1\|2\|3\|4\|null`                          | Icon position: 1=TL, 2=TR, 3=BR, 4=BL. `null` = no notification bubble.                                                                                                                          |
+| `language`                    | `string\|null`                              | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`.              |
+| `theme`                       | `"stromcom-default"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                                        |
+| `entityResolve`               | `Function`                                  | `async ({type, id, groups, url}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                                         |
 
 See [`src/StromcomConf.jsx`](./src/StromcomConf.jsx) for the full list.
 
@@ -234,12 +235,53 @@ function SwitchUserButton() {
 }
 ```
 
+### Notification center from your own button
+
+The default bubble opens the notification center over the whole page. To open it from an
+element your app already has (a toolbar button, a menu item), leave
+`notificationElementPosition` unset (the bubble renders only when it is set), keep the
+count in your own badge and call the widget's commands through `useStromcom()`:
+
+```jsx
+import { useCallback, useState } from 'react';
+import { StromcomConf, useStromcom } from '@stromcom/react-snippet';
+
+export function MessagesButton() {
+  const sc = useStromcom();
+  const [ready, setReady] = useState(false);
+  const [count, setCount] = useState(0);
+
+  const onLoad = useCallback(() => setReady(true), []);
+  const onNotification = useCallback((counts) => setCount(counts.thread + counts.notification), []);
+
+  return (
+    <>
+      <StromcomConf onLoad={onLoad} onNotification={onNotification} />
+      <button disabled={!ready} onClick={() => sc?.toggleHome?.()}>
+        Messages {count > 0 && <span className="badge">{count}</span>}
+      </button>
+    </>
+  );
+}
+```
+
+| Command        | Effect                                                        |
+| -------------- | ------------------------------------------------------------- |
+| `openHome()`   | Opens the notification center (creates it on the first call). |
+| `closeHome()`  | Hides it. A click on the backdrop does the same.              |
+| `toggleHome()` | Opens or hides it, like a click on the default bubble.        |
+
+The commands are installed by the widget itself, so they are `undefined` until the loader
+script has run, and they do nothing until the user is set (they log a warning) — guard with
+`?.` and enable the button in `onLoad`. All three return a `Promise`. `onLoad` fires once,
+when the widget starts, so `<StromcomConf>` with it has to be rendered together with
+`<StromcomUser>`, not later.
+
 ## Limitations
 
 The components cover the common cases; a few SDK features are only reachable imperatively via `useStromcom()`:
 
 - **`<StromcomThread>` doesn't forward `attributes` or `hash`**, and it is initialised once on mount. When the entity changes, pass a new React `key` to remount it.
-- **`<StromcomConf>` doesn't expose `onLoad`.**
 - **`conf()` replaces the whole configuration.** Every `<StromcomConf>` render sends its full option set, so don't mix `<StromcomConf>` with imperative `sc.conf(...)` calls — whichever runs last wins and drops the other's options. Pick one.
 - **Memoize callback and array props** (`onNotification`, `entityResolve`, `appCSSPath`, …) with `useCallback` / `useMemo` or module constants. A new identity on every render re-sends the configuration.
 

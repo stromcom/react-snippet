@@ -7,6 +7,16 @@ export interface StromcomLayer {
   thread: (target: HTMLElement, options: StromcomThreadOptions) => void;
   conf: (options: StromcomConfOptions) => void;
   home: (target: HTMLElement) => void;
+  /**
+   * Opens the notification center over the whole page (creates it on the first call).
+   * Installed by the widget itself — `undefined` until the loader script has run, a no-op
+   * with a console warning until the user is set. Wait for `StromcomConf`'s `onLoad`.
+   */
+  openHome?: () => Promise<void>;
+  /** Hides the notification center. See `openHome`. */
+  closeHome?: () => Promise<void>;
+  /** Opens or hides the notification center, like a click on the default bubble. See `openHome`. */
+  toggleHome?: () => Promise<void>;
   [key: string]: any;
 }
 
@@ -78,9 +88,22 @@ export interface StromcomEntity {
   url: string;
 }
 
+/** Unread counts passed to `onNotification`. */
+export interface StromcomNotificationCounts {
+  thread: number;
+  message: number;
+  notification: number;
+  reaction: number;
+}
+
 export interface StromcomConfOptions {
   notificationRenderer?: (notification: unknown) => unknown;
-  onNotification?: (count: number) => void;
+  onNotification?: (counts: StromcomNotificationCounts) => void;
+  /**
+   * Called once the widget is running (user set, apps rendered). From then on
+   * `openHome()`, `closeHome()` and `toggleHome()` on `useStromcom()` work.
+   */
+  onLoad?: (api: unknown) => void;
   /** CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe. */
   appFrameCSSPath?: string | string[];
   /**
@@ -96,6 +119,7 @@ export interface StromcomConfOptions {
   notificationElementStyles?: Record<string, string | number | null>;
   notificationElementCSSPath?: string;
   notificationElementNoShadowRoot?: boolean;
+  /** Called before the notification center opens for the first time (bubble click or `openHome()` / `toggleHome()`). */
   homeBeforeRender?: () => void | Promise<void>;
   notificationElementBeforeRender?: () => void | Promise<void>;
   notificationElementAfterRender?: () => void;

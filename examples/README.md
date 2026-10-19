@@ -16,6 +16,7 @@ projects.
 | [`08-theme-switcher.jsx`](./08-theme-switcher.jsx)                       | Light/dark/system theme at runtime                           |
 | [`09-staging-environment.jsx`](./09-staging-environment.jsx)             | Staging or custom loader URL                                 |
 | [`10-php-backend-integration.md`](./10-php-backend-integration.md)       | End-to-end with a PHP backend providing hashes               |
+| [`11-own-notification-button.jsx`](./11-own-notification-button.jsx)     | Notification center opened from your own button              |
 
 ## Pattern cheatsheet
 
