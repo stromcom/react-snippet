@@ -9,12 +9,12 @@ export interface StromcomLayer {
   home: (target: HTMLElement) => void;
   /**
    * Opens the notification center over the whole page (creates it on the first call).
-   * Installed by the widget itself — `undefined` until the loader script has run, a no-op
-   * with a console warning until the user is set. Wait for `StromcomConf`'s `onLoad`.
+   * Installed by the widget itself once it starts (loader script run, user set) —
+   * `undefined` until then. Wait for `StromcomConf`'s `onLoad`.
    */
   openHome?: () => Promise<void>;
   /** Hides the notification center. See `openHome`. */
-  closeHome?: () => Promise<void>;
+  closeHome?: () => void;
   /** Opens or hides the notification center, like a click on the default bubble. See `openHome`. */
   toggleHome?: () => Promise<void>;
   [key: string]: any;

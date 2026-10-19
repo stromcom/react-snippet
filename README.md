@@ -271,9 +271,9 @@ export function MessagesButton() {
 | `closeHome()`  | Hides it. A click on the backdrop does the same.              |
 | `toggleHome()` | Opens or hides it, like a click on the default bubble.        |
 
-The commands are installed by the widget itself, so they are `undefined` until the loader
-script has run, and they do nothing until the user is set (they log a warning) — guard with
-`?.` and enable the button in `onLoad`. All three return a `Promise`. `onLoad` fires once,
+The commands are installed by the widget itself once it starts — after the loader script
+has run and the user is set. Until then they are `undefined`, so guard with `?.` and
+enable the button in `onLoad`. `onLoad` fires once,
 when the widget starts, so `<StromcomConf>` with it has to be rendered together with
 `<StromcomUser>`, not later.
 
