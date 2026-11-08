@@ -17,6 +17,14 @@ export interface StromcomLayer {
   closeHome?: () => void;
   /** Opens or hides the notification center, like a click on the default bubble. See `openHome`. */
   toggleHome?: () => Promise<void>;
+  /**
+   * Loads the unread counts right away instead of waiting for the next check
+   * (`notificationInterval`). Passes them on like a regular check (`onNotification`,
+   * the bubble, open threads) and resolves with them. Calls at the same time share one
+   * request; at most one request per 5 s, otherwise it resolves with the last known counts.
+   * Rejects when notifications aren't running or the request fails. See `openHome`.
+   */
+  refreshNotifications?: () => Promise<StromcomNotificationCounts>;
   [key: string]: any;
 }
 
@@ -101,9 +109,14 @@ export interface StromcomConfOptions {
   onNotification?: (counts: StromcomNotificationCounts) => void;
   /**
    * Called once the widget is running (user set, apps rendered). From then on
-   * `openHome()`, `closeHome()` and `toggleHome()` on `useStromcom()` work.
+   * `openHome()`, `closeHome()`, `toggleHome()` and `refreshNotifications()` on `useStromcom()` work.
    */
   onLoad?: (api: unknown) => void;
+  /**
+   * How often the widget asks for unread counts, in seconds. Default 120, at least 5 —
+   * a lower value is raised to 5. Use `refreshNotifications()` for an update right away.
+   */
+  notificationInterval?: number;
   /** CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe. */
   appFrameCSSPath?: string | string[];
   /**

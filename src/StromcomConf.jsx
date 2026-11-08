@@ -11,7 +11,8 @@ import { useStromcom } from './StromcomProvider.jsx';
  *
  * @param {object}   [props.notificationRenderer]           - Function(notification) for custom notification rendering
  * @param {object}   [props.onNotification]                 - Function({thread, message, notification, reaction}) called with the unread counts
- * @param {Function} [props.onLoad]                         - Called once the widget is running; from then on stromCom.openHome() / closeHome() / toggleHome() work
+ * @param {Function} [props.onLoad]                         - Called once the widget is running; from then on stromCom.openHome() / closeHome() / toggleHome() / refreshNotifications() work
+ * @param {number}   [props.notificationInterval]           - How often the widget asks for unread counts, in seconds (default 120, at least 5)
  * @param {(string|string[])} [props.appFrameCSSPath] - CSS URL(s) for the widget frame — the shadow root holding the container, the backdrop and the iframe
  * @param {(string|string[])} [props.appCSSPath]      - CSS URL(s) for the app itself (inside the iframe), on top of the CSS from the project settings
  * @param {Function} [props.notificationElementTargetElement] - Function/Promise/Element returning the icon mount target
@@ -40,6 +41,7 @@ export function StromcomConf({
   notificationRenderer,
   onNotification,
   onLoad,
+  notificationInterval,
   appFrameCSSPath,
   appCSSPath,
   notificationElementTargetElement,
@@ -65,6 +67,7 @@ export function StromcomConf({
     if (notificationRenderer !== undefined) opts.notificationRenderer = notificationRenderer;
     if (onNotification !== undefined) opts.onNotification = onNotification;
     if (onLoad !== undefined) opts.onLoad = onLoad;
+    if (notificationInterval !== undefined) opts.notificationInterval = notificationInterval;
     if (appFrameCSSPath !== undefined) opts.appFrameCSSPath = appFrameCSSPath;
     if (appCSSPath !== undefined) opts.appCSSPath = appCSSPath;
     if (notificationElementTargetElement !== undefined)
@@ -94,6 +97,7 @@ export function StromcomConf({
     notificationRenderer,
     onNotification,
     onLoad,
+    notificationInterval,
     appFrameCSSPath,
     appCSSPath,
     notificationElementTargetElement,

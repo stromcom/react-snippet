@@ -61,6 +61,13 @@ describe('StromcomConf', () => {
     expect(layer.conf).toHaveBeenCalledWith({ appCSSPath });
   });
 
+  it('sends the notification interval', () => {
+    const layer = { conf: vi.fn() };
+    renderWithLayer(layer, { notificationInterval: 30 });
+
+    expect(layer.conf).toHaveBeenCalledWith({ notificationInterval: 30 });
+  });
+
   it('sends the language option', () => {
     const layer = { conf: vi.fn() };
     renderWithLayer(layer, { language: 'cs' });
