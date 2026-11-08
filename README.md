@@ -185,17 +185,18 @@ Sends SDK configuration. Place once inside the provider, before threads.
 
 Notable options:
 
-| Prop                          | Type                                        | Description                                                                                                                                                                                      |
-| ----------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `notificationRenderer`        | `Function`                                  | Custom notification rendering function.                                                                                                                                                          |
-| `onNotification`              | `Function`                                  | Called with the unread counts `{thread, message, notification, reaction}`.                                                                                                                       |
-| `onLoad`                      | `Function`                                  | Called once the widget is running. From then on `openHome()`, `closeHome()` and `toggleHome()` work — see [Notification center from your own button](#notification-center-from-your-own-button). |
-| `appFrameCSSPath`             | `string\|string[]`                          | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                                   |
-| `appCSSPath`                  | `string\|string[]`                          | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                                         |
-| `notificationElementPosition` | `1\|2\|3\|4\|null`                          | Icon position: 1=TL, 2=TR, 3=BR, 4=BL. `null` = no notification bubble.                                                                                                                          |
-| `language`                    | `string\|null`                              | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`.              |
-| `theme`                       | `"stromcom-default"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                                        |
-| `entityResolve`               | `Function`                                  | `async ({type, id, groups, url}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                                         |
+| Prop                          | Type                                        | Description                                                                                                                                                                                                                |
+| ----------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `notificationRenderer`        | `Function`                                  | Custom notification rendering function.                                                                                                                                                                                    |
+| `onNotification`              | `Function`                                  | Called with the unread counts `{thread, message, notification, reaction}`.                                                                                                                                                 |
+| `onLoad`                      | `Function`                                  | Called once the widget is running. From then on `openHome()`, `closeHome()`, `toggleHome()` and `refreshNotifications()` work — see [Notification center from your own button](#notification-center-from-your-own-button). |
+| `notificationInterval`        | `number`                                    | How often the widget asks for unread counts, in seconds. Default `120`, at least `5` (a lower value is raised to 5).                                                                                                       |
+| `appFrameCSSPath`             | `string\|string[]`                          | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                                                             |
+| `appCSSPath`                  | `string\|string[]`                          | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                                                                   |
+| `notificationElementPosition` | `1\|2\|3\|4\|null`                          | Icon position: 1=TL, 2=TR, 3=BR, 4=BL. `null` = no notification bubble.                                                                                                                                                    |
+| `language`                    | `string\|null`                              | UI language. Any code is accepted; one without a translation falls back to the browser language, then English. `null` follows the browser. Overrides `<StromcomProvider language>`.                                        |
+| `theme`                       | `"stromcom-default"\|"stromcom-dark"\|null` | Theme. `null` follows browser preference.                                                                                                                                                                                  |
+| `entityResolve`               | `Function`                                  | `async ({type, id, groups, url}) => detail` — resolves business-entity detail (order, ticket…) for the message editor's chip hover-card.                                                                                   |
 
 See [`src/StromcomConf.jsx`](./src/StromcomConf.jsx) for the full list.
 
@@ -265,17 +266,33 @@ export function MessagesButton() {
 }
 ```
 
-| Command        | Effect                                                        |
-| -------------- | ------------------------------------------------------------- |
-| `openHome()`   | Opens the notification center (creates it on the first call). |
-| `closeHome()`  | Hides it. A click on the backdrop does the same.              |
-| `toggleHome()` | Opens or hides it, like a click on the default bubble.        |
+| Command                  | Effect                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openHome()`             | Opens the notification center (creates it on the first call).                                                                                                                                                    |
+| `closeHome()`            | Hides it. A click on the backdrop does the same.                                                                                                                                                                 |
+| `toggleHome()`           | Opens or hides it, like a click on the default bubble.                                                                                                                                                           |
+| `refreshNotifications()` | Loads the unread counts right away and resolves with `{thread, message, notification, reaction}`; they also reach `onNotification` and the bubble. At most one request per 5 s, otherwise the last known counts. |
 
 The commands are installed by the widget itself once it starts — after the loader script
 has run and the user is set. Until then they are `undefined`, so guard with `?.` and
 enable the button in `onLoad`. `onLoad` fires once,
 when the widget starts, so `<StromcomConf>` with it has to be rendered together with
 `<StromcomUser>`, not later.
+
+The badge gets new counts every `notificationInterval` seconds (120 by default). To update
+it sooner — when the user comes back to the tab, or after an action in your app — call
+`refreshNotifications()`:
+
+```jsx
+useEffect(() => {
+  if (!ready) return undefined;
+  const onVisible = () => {
+    if (!document.hidden) sc?.refreshNotifications?.();
+  };
+  document.addEventListener('visibilitychange', onVisible);
+  return () => document.removeEventListener('visibilitychange', onVisible);
+}, [ready, sc]);
+```
 
 ## Limitations
 
