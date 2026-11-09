@@ -190,7 +190,7 @@ Notable options:
 | `notificationRenderer`        | `Function`                                  | Custom notification rendering function.                                                                                                                                                                                    |
 | `onNotification`              | `Function`                                  | Called with the unread counts `{thread, message, notification, reaction}`.                                                                                                                                                 |
 | `onLoad`                      | `Function`                                  | Called once the widget is running. From then on `openHome()`, `closeHome()`, `toggleHome()` and `refreshNotifications()` work — see [Notification center from your own button](#notification-center-from-your-own-button). |
-| `notificationInterval`        | `number`                                    | How often the widget asks for unread counts, in seconds. Default `120`, at least `5` (a lower value is raised to 5).                                                                                                       |
+| `notificationInterval`        | `number`                                    | How often the widget asks for unread counts, in seconds. Default `120`; a positive value is kept between `5` and `86400` (one day), `0` or a negative value means the default.                                             |
 | `appFrameCSSPath`             | `string\|string[]`                          | CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe.                                                                                                                             |
 | `appCSSPath`                  | `string\|string[]`                          | CSS for the app itself (inside the iframe), on top of the CSS from the project settings.                                                                                                                                   |
 | `notificationElementPosition` | `1\|2\|3\|4\|null`                          | Icon position: 1=TL, 2=TR, 3=BR, 4=BL. `null` = no notification bubble.                                                                                                                                                    |
@@ -266,12 +266,12 @@ export function MessagesButton() {
 }
 ```
 
-| Command                  | Effect                                                                                                                                                                                                           |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openHome()`             | Opens the notification center (creates it on the first call).                                                                                                                                                    |
-| `closeHome()`            | Hides it. A click on the backdrop does the same.                                                                                                                                                                 |
-| `toggleHome()`           | Opens or hides it, like a click on the default bubble.                                                                                                                                                           |
-| `refreshNotifications()` | Loads the unread counts right away and resolves with `{thread, message, notification, reaction}`; they also reach `onNotification` and the bubble. At most one request per 5 s, otherwise the last known counts. |
+| Command                  | Effect                                                                                                                                                                                                                                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openHome()`             | Opens the notification center (creates it on the first call).                                                                                                                                                                                                                                             |
+| `closeHome()`            | Hides it. A click on the backdrop does the same.                                                                                                                                                                                                                                                          |
+| `toggleHome()`           | Opens or hides it, like a click on the default bubble.                                                                                                                                                                                                                                                    |
+| `refreshNotifications()` | Loads the unread counts right away and resolves with `{thread, message, notification, reaction}`; they also reach `onNotification` and the bubble. At most one request per 5 s, otherwise it settles like the last request. Works already in `onLoad`; rejects when the request fails, so add `.catch()`. |
 
 The commands are installed by the widget itself once it starts — after the loader script
 has run and the user is set. Until then they are `undefined`, so guard with `?.` and
@@ -287,7 +287,7 @@ it sooner — when the user comes back to the tab, or after an action in your ap
 useEffect(() => {
   if (!ready) return undefined;
   const onVisible = () => {
-    if (!document.hidden) sc?.refreshNotifications?.();
+    if (!document.hidden) sc?.refreshNotifications?.()?.catch(() => {});
   };
   document.addEventListener('visibilitychange', onVisible);
   return () => document.removeEventListener('visibilitychange', onVisible);
