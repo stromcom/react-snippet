@@ -12,7 +12,7 @@ import { useStromcom } from './StromcomProvider.jsx';
  * @param {object}   [props.notificationRenderer]           - Function(notification) for custom notification rendering
  * @param {object}   [props.onNotification]                 - Function({thread, message, notification, reaction}) called with the unread counts
  * @param {Function} [props.onLoad]                         - Called once the widget is running; from then on stromCom.openHome() / closeHome() / toggleHome() / refreshNotifications() work
- * @param {number}   [props.notificationInterval]           - How often the widget asks for unread counts, in seconds (default 120, at least 5)
+ * @param {number}   [props.notificationInterval]           - How often the widget asks for unread counts, in seconds (default 120, kept between 5 and 86400)
  * @param {(string|string[])} [props.appFrameCSSPath] - CSS URL(s) for the widget frame — the shadow root holding the container, the backdrop and the iframe
  * @param {(string|string[])} [props.appCSSPath]      - CSS URL(s) for the app itself (inside the iframe), on top of the CSS from the project settings
  * @param {Function} [props.notificationElementTargetElement] - Function/Promise/Element returning the icon mount target

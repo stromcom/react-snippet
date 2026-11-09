@@ -31,7 +31,7 @@ function useRefreshOnVisible(ready) {
   useEffect(() => {
     if (!ready) return undefined;
     const onVisible = () => {
-      if (!document.hidden) sc?.refreshNotifications?.();
+      if (!document.hidden) sc?.refreshNotifications?.()?.catch(() => {});
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);

@@ -21,8 +21,9 @@ export interface StromcomLayer {
    * Loads the unread counts right away instead of waiting for the next check
    * (`notificationInterval`). Passes them on like a regular check (`onNotification`,
    * the bubble, open threads) and resolves with them. Calls at the same time share one
-   * request; at most one request per 5 s, otherwise it resolves with the last known counts.
-   * Rejects when notifications aren't running or the request fails. See `openHome`.
+   * request; at most one request per 5 s, otherwise it settles like the last request (the
+   * counts, or the same error). Works already in `onLoad`. Rejects when notifications aren't
+   * running or the request fails — handle it with `.catch()`. See `openHome`.
    */
   refreshNotifications?: () => Promise<StromcomNotificationCounts>;
   [key: string]: any;
@@ -113,8 +114,9 @@ export interface StromcomConfOptions {
    */
   onLoad?: (api: unknown) => void;
   /**
-   * How often the widget asks for unread counts, in seconds. Default 120, at least 5 —
-   * a lower value is raised to 5. Use `refreshNotifications()` for an update right away.
+   * How often the widget asks for unread counts, in seconds. Default 120; a positive value is
+   * kept between 5 and 86400 (one day), 0 or a negative value means the default.
+   * Use `refreshNotifications()` for an update right away.
    */
   notificationInterval?: number;
   /** CSS for the widget frame — the shadow root holding the container, the backdrop and the iframe. */
